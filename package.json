@@ -1,0 +1,19 @@
+{
+  "name": "image-priority-fetchpriority-repro",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "start": "next start",
+    "dev": "next dev"
+  },
+  "dependencies": {
+    "next": "16.4.0-canary.33",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.3",
+    "@types/react": "19.3.0",
+    "typescript": "7.0.2"
+  }
+}
