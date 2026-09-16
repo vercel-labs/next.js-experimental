@@ -1,0 +1,12 @@
+{
+  "name": "skip-polyfill-module-repro",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": { "build": "next build", "start": "next start" },
+  "browserslist": ["chrome >= 100", "safari >= 15", "firefox >= 100", "edge >= 100"],
+  "dependencies": {
+    "next": "16.4.0-canary.32",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  }
+}
