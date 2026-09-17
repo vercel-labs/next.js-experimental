@@ -1,0 +1,4 @@
+node_modules
+.next
+app/p*/
+app/api/
