@@ -1,0 +1,16 @@
+{
+  "name": "repro-metadata-route-handler-typegen",
+  "private": true,
+  "scripts": {
+    "typegen": "next typegen",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "16.4.0-canary.52",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "typescript": "5.9.2",
+    "@types/node": "22.10.0",
+    "@types/react": "19.2.0"
+  }
+}
