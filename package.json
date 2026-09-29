@@ -1,15 +1,18 @@
 {
-  "name": "repro-98038",
+  "name": "metadata-typegen-repro",
   "private": true,
-  "devDependencies": { "@playwright/test": "^1.56.0" },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "typegen": "next typegen",
+    "check": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "16.2.6",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "next": "16.4.0-canary.52",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "typescript": "5.9.2",
+    "@types/node": "22.13.5",
+    "@types/react": "19.2.0"
   }
 }

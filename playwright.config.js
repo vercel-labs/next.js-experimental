@@ -1,1 +1,0 @@
-module.exports = { testDir: './qa', reporter: [['list'], ['html', { outputFolder: './playwright-report', open: 'never' }]], use: { trace: 'on', screenshot: 'only-on-failure' }, outputDir: './test-results' }
