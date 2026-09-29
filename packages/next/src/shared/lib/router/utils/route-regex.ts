@@ -90,6 +90,70 @@ type GetRouteRegexOptions = {
   excludeOptionalTrailingSlash?: boolean
 }
 
+/**
+ * Matches any character outside of the ASCII range.
+ */
+// eslint-disable-next-line no-control-regex
+const nonAsciiRegex = /[^\u0000-\u007F]/
+
+/**
+ * Escapes a percent-encoded string for use in a regular expression, keeping the
+ * hex digits case-insensitive. Clients are supposed to send upper case hex
+ * digits (and `encodeURIComponent` produces them), but lower case digits are
+ * equally valid, so `%D0%B1` has to also match `%d0%b1`.
+ */
+function escapePercentEncoded(encoded: string): string {
+  return escapeStringRegexp(encoded).replace(
+    /%[0-9A-Fa-f]{2}/g,
+    (match) =>
+      '%' +
+      match
+        .slice(1)
+        .split('')
+        .map((char) =>
+          /[A-Fa-f]/.test(char)
+            ? `[${char.toUpperCase()}${char.toLowerCase()}]`
+            : char
+        )
+        .join('')
+  )
+}
+
+/**
+ * Builds the pattern for the literal (non-parameter) part of a route segment.
+ *
+ * Route definitions hold the decoded form of the pathname, because that's how
+ * pages are named on the filesystem (e.g. `app/блог/[slug]/page.tsx` is
+ * `/блог/[slug]`). Requests, however, arrive percent-encoded
+ * (`/%D0%B1%D0%BB%D0%BE%D0%B3/hello`), and route regexes are matched against
+ * the raw request pathname, both by the Next.js server and by external routers
+ * that consume the routes manifest. A literal segment with non-ASCII
+ * characters therefore has to match both forms.
+ */
+function escapeRouteLiteral(literal: string): string {
+  const escaped = escapeStringRegexp(literal)
+
+  // Fast path: an all-ASCII literal is sent as-is by clients, so there is no
+  // encoded variant to match and the pattern is unchanged.
+  if (!nonAsciiRegex.test(literal)) {
+    return escaped
+  }
+
+  let encoded: string
+  try {
+    encoded = literal.split('/').map(encodeURIComponent).join('/')
+  } catch {
+    // Lone surrogates can't be encoded, match the literal form only.
+    return escaped
+  }
+
+  if (encoded === literal) {
+    return escaped
+  }
+
+  return `(?:${escaped}|${escapePercentEncoded(encoded)})`
+}
+
 function getParametrizedRoute(
   route: string,
   includeSuffix: boolean,
@@ -114,7 +178,7 @@ function getParametrizedRoute(
       groups[key] = { pos: groupIndex++, repeat, optional }
 
       if (includePrefix && paramMatches[1]) {
-        segments.push(`/${escapeStringRegexp(paramMatches[1])}`)
+        segments.push(`/${escapeRouteLiteral(paramMatches[1])}`)
       }
 
       let s = repeat ? (optional ? '(?:/(.+?))?' : '/(.+?)') : '/([^/]+?)'
@@ -126,12 +190,12 @@ function getParametrizedRoute(
 
       segments.push(s)
     } else {
-      segments.push(`/${escapeStringRegexp(segment)}`)
+      segments.push(`/${escapeRouteLiteral(segment)}`)
     }
 
     // If there's a suffix, add it to the segments if it's enabled.
     if (includeSuffix && paramMatches && paramMatches[3]) {
-      segments.push(escapeStringRegexp(paramMatches[3]))
+      segments.push(escapeRouteLiteral(paramMatches[3]))
     }
   }
 
@@ -323,7 +387,7 @@ function getNamedParametrizedRoute(
     } else if (paramMatches && paramMatches[2]) {
       // If there's a prefix, add it to the segments if it's enabled.
       if (includePrefix && paramMatches[1]) {
-        segments.push(`/${escapeStringRegexp(paramMatches[1])}`)
+        segments.push(`/${escapeRouteLiteral(paramMatches[1])}`)
         inverseParts.push(`/${paramMatches[1]}`)
       }
 
@@ -348,13 +412,13 @@ function getNamedParametrizedRoute(
       )
       reference.names[key] ??= cleanedKey
     } else {
-      segments.push(`/${escapeStringRegexp(segment)}`)
+      segments.push(`/${escapeRouteLiteral(segment)}`)
       inverseParts.push(`/${segment}`)
     }
 
     // If there's a suffix, add it to the segments if it's enabled.
     if (includeSuffix && paramMatches && paramMatches[3]) {
-      segments.push(escapeStringRegexp(paramMatches[3]))
+      segments.push(escapeRouteLiteral(paramMatches[3]))
       inverseParts.push(paramMatches[3])
     }
   }

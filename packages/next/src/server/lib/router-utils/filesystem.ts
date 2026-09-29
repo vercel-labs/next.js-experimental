@@ -841,19 +841,16 @@ export async function setupFsCheck(opts: {
           } catch {}
         }
 
-        // Only page and app outputs participate in route rendering. Public,
-        // static, image, and virtual outputs are served as filesystem assets.
-        const route = isPageOrAppFile
-          ? getRouteDefinition(type, curItemPath, locale)
-          : undefined
-
         let matchedItem = items.has(curItemPath)
 
         // check decoded variant as well
-        if (!matchedItem && !opts.dev) {
+        if (!matchedItem) {
+          // Page and app routes are keyed by their decoded pathname, since
+          // that's how they're named on the filesystem (`app/тест/page.tsx`
+          // is `/тест`), while the request pathname is percent-encoded.
           matchedItem = items.has(curDecodedItemPath)
           if (matchedItem) curItemPath = curDecodedItemPath
-          else {
+          else if (!opts.dev) {
             // x-ref: https://github.com/vercel/next.js/issues/54008
             // There're cases that urls get decoded before requests, we should support both encoded and decoded ones.
             // e.g. nginx could decode the proxy urls, the below ones should be treated as the same:
@@ -865,6 +862,20 @@ export async function setupFsCheck(opts: {
               matchedItem = items.has(encodedCurItemPath)
             } catch {}
           }
+        }
+
+        // Only page and app outputs participate in route rendering. Public,
+        // static, image, and virtual outputs are served as filesystem assets.
+        // This is resolved after `curItemPath` has settled on the form the
+        // route definitions are keyed by, so that a percent-encoded request
+        // for a non-ASCII route still finds its definition.
+        let route = isPageOrAppFile
+          ? getRouteDefinition(type, curItemPath, locale)
+          : undefined
+
+        if (!route && isPageOrAppFile && curDecodedItemPath !== curItemPath) {
+          route = getRouteDefinition(type, curDecodedItemPath, locale)
+          if (route) curItemPath = curDecodedItemPath
         }
 
         if (matchedItem || opts.dev) {

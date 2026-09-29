@@ -74,13 +74,34 @@ export function appendSegmentRequestKeyPart(
 // by default for compactness, and for easier debugging.
 const simpleParamValueRegex = /^[a-zA-Z0-9\-_@]+$/
 
+/**
+ * `btoa` only accepts characters in the Latin1 range, so a value containing
+ * e.g. Cyrillic or Japanese characters (which is possible for both param
+ * values and literal segment names like `app/тест/page.tsx`) has to be
+ * converted to its UTF-8 bytes first. Without this, encoding a non-Latin1
+ * segment throws `InvalidCharacterError`.
+ */
+function toLatin1(value: string): string {
+  const bytes = new TextEncoder().encode(value)
+  let result = ''
+  // Chunk the conversion instead of spreading the whole array, since a large
+  // value would otherwise exceed the maximum argument count.
+  for (let i = 0; i < bytes.length; i += 4096) {
+    result += String.fromCharCode.apply(
+      null,
+      bytes.subarray(i, i + 4096) as unknown as number[]
+    )
+  }
+  return result
+}
+
 function encodeToFilesystemAndURLSafeString(value: string) {
   if (simpleParamValueRegex.test(value)) {
     return value
   }
   // If there are any unsafe characters, base64url-encode the entire value.
   // We also add a ! prefix so it doesn't collide with the simple case.
-  const base64url = btoa(value)
+  const base64url = btoa(toLatin1(value))
     .replace(/\+/g, '-') // Replace '+' with '-'
     .replace(/\//g, '_') // Replace '/' with '_'
     .replace(/=+$/, '') // Remove trailing '='

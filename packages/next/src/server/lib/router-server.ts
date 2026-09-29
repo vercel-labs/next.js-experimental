@@ -28,6 +28,7 @@ import { getResolveRoutes } from './router-utils/resolve-routes'
 import { addRequestMeta, getRequestMeta } from '../request-meta'
 import { pathHasPrefix } from '../../shared/lib/router/utils/path-has-prefix'
 import { removePathPrefix } from '../../shared/lib/router/utils/remove-path-prefix'
+import { encodeRoutePathnameForHeader } from '../../shared/lib/router/utils/route-pathname-encoding'
 import setupCompression from 'next/dist/compiled/compression'
 import { releaseCompressionStream } from './release-compression-stream'
 import { signalFromNodeResponse } from '../web/spec-extension/adapters/next-request'
@@ -450,7 +451,10 @@ export async function initialize(opts: {
         fsChecker.getMiddlewareMatchers()?.length &&
         removePathPrefix(invokePath, config.basePath) === '/404'
       ) {
-        res.setHeader('x-nextjs-matched-path', parsedUrl.pathname || '')
+        res.setHeader(
+          'x-nextjs-matched-path',
+          encodeRoutePathnameForHeader(parsedUrl.pathname || '')
+        )
         res.statusCode = 404
         res.setHeader('content-type', 'application/json')
         res.end('{}')

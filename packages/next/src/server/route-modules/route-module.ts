@@ -69,6 +69,7 @@ import {
 } from '../lib/router-utils/router-server-context'
 import { decodePathParams } from '../lib/router-utils/decode-path-params'
 import { removeTrailingSlash } from '../../shared/lib/router/utils/remove-trailing-slash'
+import { encodeRoutePathnameForHeader } from '../../shared/lib/router/utils/route-pathname-encoding'
 import { isInterceptionRouteRewrite } from '../../lib/is-interception-route-rewrite'
 import { getTracer } from '../lib/trace/tracer'
 import { RouteModuleSpan } from '../lib/trace/constants'
@@ -1081,7 +1082,11 @@ export abstract class RouteModule<
     ) {
       res.setHeader(
         'x-nextjs-matched-path',
-        removeTrailingSlash(`${locale ? `/${locale}` : ''}${normalizedSrcPage}`)
+        encodeRoutePathnameForHeader(
+          removeTrailingSlash(
+            `${locale ? `/${locale}` : ''}${normalizedSrcPage}`
+          )
+        )
       )
     }
     const encodedResolvedPathname = resolvedPathname

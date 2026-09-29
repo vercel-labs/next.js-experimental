@@ -8,6 +8,7 @@ import type { UrlObject } from 'url'
 import type PageLoader from '../../../client/page-loader'
 import type { AppContextType, NextPageContext, NEXT_DATA } from '../utils'
 import { removeTrailingSlash } from './utils/remove-trailing-slash'
+import { decodeRoutePathname } from './utils/route-pathname-encoding'
 import {
   getClientBuildManifest,
   isAssetError,
@@ -259,7 +260,11 @@ function getMiddlewareData<T extends FetchDataOutput>(
         parseData: true,
       })
 
-      let fsPathname = removeTrailingSlash(pathnameInfo.pathname)
+      // The matched path header carries the pathname percent-encoded, but page
+      // names (and the route keys the client router uses) are decoded.
+      let fsPathname = decodeRoutePathname(
+        removeTrailingSlash(pathnameInfo.pathname)
+      )
       return Promise.all([
         options.router.pageLoader.getPageList(),
         getClientBuildManifest(),
@@ -270,8 +275,10 @@ function getMiddlewareData<T extends FetchDataOutput>(
           isDynamicRoute(as) ||
           (!rewriteHeader &&
             pages.includes(
-              normalizeLocalePath(removeBasePath(as), options.router.locales)
-                .pathname
+              decodeRoutePathname(
+                normalizeLocalePath(removeBasePath(as), options.router.locales)
+                  .pathname
+              )
             ))
         ) {
           const parsedSource = getNextPathnameInfo(
@@ -318,10 +325,12 @@ function getMiddlewareData<T extends FetchDataOutput>(
 
         const resolvedHref = !pages.includes(fsPathname)
           ? resolveDynamicRoute(
-              normalizeLocalePath(
-                removeBasePath(parsedRewriteTarget.pathname),
-                options.router.locales
-              ).pathname,
+              decodeRoutePathname(
+                normalizeLocalePath(
+                  removeBasePath(parsedRewriteTarget.pathname),
+                  options.router.locales
+                ).pathname
+              ),
               pages
             )
           : fsPathname
