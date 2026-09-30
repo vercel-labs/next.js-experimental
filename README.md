@@ -1,34 +1,43 @@
-# next.js#98604 verification harness — `allowedDevOrigins` "hydration mismatch"
+# Repro: metadata files validated as route handlers during type generation
 
-App code is the reporter's `create-next-app` scaffold (Next 16.3.5, React 19.2.8) with
-`allowedDevOrigins: ["127.0.0.1"]` in `next.config.ts`.
+next@16.4.0-canary.52
 
 ## Run
 
 ```bash
 npm install
-npm i -D playwright@1.61.0 && npx playwright install chromium
-npm run dev            # http://127.0.0.1:3000
-
-# 10 plain loads of the reporter's exact setup -> 0/10 hydration errors
-node verify.js http://127.0.0.1:3000/ 10 baseline
-
-# same setup, but a fake "browser extension" inserts a
-# <div style="display:contents"> as the first child of <body> while the page
-# is loading -> reproduces the reported diff on every load
-node verify.js http://127.0.0.1:3000/ 4 injected inject
+npx next dev            # let it compile "/" once, then stop it
+npx tsc --noEmit
 ```
 
-## Results observed (Linux, Chromium 149, Next 16.3.5)
+or `./repro.sh`
 
-| config | origin | fake extension | hydration error |
-| --- | --- | --- | --- |
-| `allowedDevOrigins: ["127.0.0.1"]` | `127.0.0.1:3000` | no | 0/10 |
-| `allowedDevOrigins: ["127.0.0.1"]` | `127.0.0.1:3000` | yes | 4/4 (exact reported diff) |
-| no `allowedDevOrigins` | `localhost:3001` | yes | 4/4 (exact reported diff) |
-| no `allowedDevOrigins` | `127.0.0.1:3001` | yes | 0/3 — HMR websocket is blocked (`⚠ Blocked cross-origin request to Next.js dev resource /_next/hmr from "127.0.0.1"`) so the dev client never reports it |
+## Expected
 
-The SSR HTML is byte-identical with and without `allowedDevOrigins` (only the
-per-request `__next_r` id differs), so the option cannot change what is hydrated.
-It only stops Next from blocking `/_next/*` + HMR for the `127.0.0.1` origin, which
-is what makes the (extension-induced) mismatch visible again.
+Metadata file conventions (`opengraph-image.tsx`, `icon.tsx`, `sitemap.ts`, `robots.ts`)
+are excluded from ordinary route-handler validation.
+
+## Actual
+
+`.next/dev/types/validator.ts` (written by the dev bundler) validates every metadata
+file against `RouteHandlerConfig`, so `tsc` fails:
+
+```
+.next/dev/types/validator.ts(72,31): error TS2559: Type 'typeof import(".../app/blog/[slug]/opengraph-image")' has no properties in common with type 'RouteHandlerConfig<"/blog/[slug]/opengraph-image">'.
+.next/dev/types/validator.ts(81,31): error TS2559: ... app/icon ... RouteHandlerConfig<"/icon">
+.next/dev/types/validator.ts(90,31): error TS2559: ... app/opengraph-image ... RouteHandlerConfig<"/opengraph-image">
+.next/dev/types/validator.ts(99,31): error TS2559: ... app/robots ... RouteHandlerConfig<"/robots.txt">
+.next/dev/types/validator.ts(108,31): error TS2559: ... app/sitemap ... RouteHandlerConfig<"/sitemap.xml">
+```
+
+The metadata modules only export the documented `default` / `alt` / `size` /
+`contentType`, which share no properties with the `GET?/POST?/...` handler shape.
+
+## Notes
+
+- `next typegen` and `next build` write `.next/types/validator.ts` and correctly omit
+  metadata files. Only the dev-bundler path (`.next/dev/types/validator.ts`) is affected.
+- In `packages/next/src/server/lib/router-utils/typegen.ts`, `generateValidations()`
+  only filters metadata files for `AppPageConfig`, not for `RouteHandlerConfig`.
+- In `setup-dev-bundler.ts` metadata pages are normalized to `<route>/route`, so
+  `isAppRouteRoute(appPath)` is true and they are pushed into `appRouteHandlers`.
