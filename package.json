@@ -1,0 +1,23 @@
+{
+  "name": "blocking-param-client-nav-repro",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "next build --turbopack",
+    "start": "next start -p 3100",
+    "probe": "node probe.mjs",
+    "nav": "node nav-test.mjs"
+  },
+  "dependencies": {
+    "next": "16.4.0-canary.57",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "playwright": "^1.63.0",
+    "typescript": "^7.0.2"
+  },
+  "private": true
+}
