@@ -1,0 +1,16 @@
+{
+  "name": "turbopack-stale-pipeline-cache-repro",
+  "private": true,
+  "scripts": { "generate": "node generate.mjs", "build": "next build" },
+  "dependencies": {
+    "fake-macro": "file:./fake-macro",
+    "next": "16.4.0-canary.57",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "7.29.7",
+    "@types/react": "19.2.14",
+    "typescript": "5.9.3"
+  }
+}
