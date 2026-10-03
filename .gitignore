@@ -1,0 +1,4 @@
+node_modules
+.next
+next-dev.log
+result.json

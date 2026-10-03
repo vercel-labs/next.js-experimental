@@ -1,0 +1,19 @@
+{
+  "name": "next-dev-signal-exit-repro",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "repro": "node run-repro.mjs"
+  },
+  "dependencies": {
+    "next": "16.4.0-canary.55",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.4",
+    "@types/react": "19.3.0",
+    "typescript": "7.0.2"
+  }
+}
