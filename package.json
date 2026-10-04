@@ -1,0 +1,15 @@
+{
+  "name": "repro-dev-ssr-stack-overflow-module-evaluation",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "node scripts/generate-chain.mjs && next dev --turbopack",
+    "dev:webpack": "node scripts/generate-chain.mjs && next dev --webpack",
+    "build": "node scripts/generate-chain.mjs && next build"
+  },
+  "dependencies": {
+    "next": "16.4.0-canary.55",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  }
+}
