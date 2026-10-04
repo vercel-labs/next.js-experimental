@@ -1,0 +1,7 @@
+{
+  "name": "nextjs-issue-99656-repro",
+  "private": true,
+  "type": "module",
+  "scripts": { "repro": "node repro.mjs" },
+  "dependencies": { "playwright": "1.63.0" }
+}
