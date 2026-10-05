@@ -132,6 +132,10 @@ import { normalizeLocalePath } from '../shared/lib/i18n/normalize-locale-path'
 import { matchNextDataPathname } from './lib/match-next-data-pathname'
 import getRouteFromAssetPath from '../shared/lib/router/utils/get-route-from-asset-path'
 import { getRouteMatcher } from '../shared/lib/router/utils/route-matcher'
+import {
+  decodeRoutePathname,
+  encodeRoutePathnameForHeader,
+} from '../shared/lib/router/utils/route-pathname-encoding'
 import { RSCPathnameNormalizer } from './normalizers/request/rsc'
 import { stripFlightHeaders } from './app-render/strip-flight-headers'
 import {
@@ -1935,6 +1939,15 @@ export default abstract class Server<
       }
     }
 
+    // A percent-encoded request for a route with non-ASCII characters in its
+    // name refers to the same definition, which is stored decoded.
+    if (decodeRoutePathname(matchPathname) === definition.pathname) {
+      return {
+        definition,
+        params: undefined,
+      }
+    }
+
     return null
   }
 
@@ -1949,7 +1962,13 @@ export default abstract class Server<
         localeAnalysisResult
       )
 
-      if (matchPathname === definition.pathname) {
+      if (
+        matchPathname === definition.pathname ||
+        // External routers send the matched path percent-encoded, while the
+        // route pattern is stored decoded (e.g. `/блог/[slug]`).
+        (matchPathname !== null &&
+          decodeRoutePathname(matchPathname) === definition.pathname)
+      ) {
         return definition
       }
     }
@@ -2526,7 +2545,7 @@ export default abstract class Server<
       req.headers['x-middleware-prefetch'] &&
       !(is404Page || pathname === '/_error')
     ) {
-      res.setHeader(MATCHED_PATH_HEADER, pathname)
+      res.setHeader(MATCHED_PATH_HEADER, encodeRoutePathnameForHeader(pathname))
       res.setHeader('x-middleware-skip', '1')
       res.setHeader(
         'cache-control',
@@ -2555,7 +2574,7 @@ export default abstract class Server<
     ) {
       res.setHeader(
         'x-nextjs-matched-path',
-        `${locale ? `/${locale}` : ''}${pathname}`
+        encodeRoutePathnameForHeader(`${locale ? `/${locale}` : ''}${pathname}`)
       )
     }
 
@@ -3173,7 +3192,7 @@ export default abstract class Server<
 
       res.setHeader(
         'x-nextjs-matched-path',
-        `${locale ? `/${locale}` : ''}${pathname}`
+        encodeRoutePathnameForHeader(`${locale ? `/${locale}` : ''}${pathname}`)
       )
       res.statusCode = 200
       res.setHeader('Content-Type', JSON_CONTENT_TYPE_HEADER)

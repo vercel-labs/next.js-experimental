@@ -1,4 +1,4 @@
-import { getNamedRouteRegex } from './route-regex'
+import { getNamedRouteRegex, getRouteRegex } from './route-regex'
 import { parseParameter } from './get-dynamic-param'
 import { pathToRegexp } from 'next/dist/compiled/path-to-regexp'
 
@@ -1261,5 +1261,64 @@ describe('getNamedRouteRegex - pathToRegexpPattern Conformance', () => {
         ]
       `)
     })
+  })
+})
+
+describe('non-ASCII route names', () => {
+  it('matches a literal segment in both its decoded and encoded form', () => {
+    const { re } = getRouteRegex('/блог/[slug]')
+
+    expect(re.test('/блог/hello')).toBe(true)
+    expect(re.test('/%D0%B1%D0%BB%D0%BE%D0%B3/hello')).toBe(true)
+    // Percent-encoding hex digits are case-insensitive.
+    expect(re.test('/%d0%b1%d0%bb%d0%be%d0%b3/hello')).toBe(true)
+    expect(re.test('/blog/hello')).toBe(false)
+  })
+
+  it('captures params from an encoded literal segment', () => {
+    const { re, groups } = getRouteRegex('/блог/[slug]')
+    const match = re.exec(
+      '/%D0%B1%D0%BB%D0%BE%D0%B3/%D0%BF%D1%80%D0%B8%D0%B2%D0%B5%D1%82'
+    )
+
+    expect(match?.[groups.slug.pos]).toBe(
+      '%D0%BF%D1%80%D0%B8%D0%B2%D0%B5%D1%82'
+    )
+  })
+
+  it('matches an encoded literal segment with the named regex', () => {
+    const { namedRegex } = getNamedRouteRegex('/блог/[slug]', {
+      prefixRouteKeys: true,
+    })
+
+    expect(
+      new RegExp(namedRegex).exec('/%D0%B1%D0%BB%D0%BE%D0%B3/hello')?.groups
+    ).toEqual({ nxtPslug: 'hello' })
+  })
+
+  it('matches an encoded prefix and suffix around a param', () => {
+    const { re } = getRouteRegex('/тест-[slug].данные', {
+      includePrefix: true,
+      includeSuffix: true,
+    })
+
+    expect(re.test('/тест-hello.данные')).toBe(true)
+    expect(
+      re.test(
+        '/%D1%82%D0%B5%D1%81%D1%82-hello.%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D0%B5'
+      )
+    ).toBe(true)
+  })
+
+  it('leaves ASCII routes unchanged', () => {
+    expect(getRouteRegex('/blog/[slug]').re.source).toBe(
+      String.raw`^\/blog\/([^/]+?)(?:\/)?$`
+    )
+  })
+
+  it('does not let an encoded segment match a different literal', () => {
+    const { re } = getRouteRegex('/блог/[slug]')
+
+    expect(re.test('/%D1%81%D1%82%D0%B0%D1%82%D1%8C%D1%8F/hello')).toBe(false)
   })
 })
