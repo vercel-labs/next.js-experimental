@@ -1,0 +1,13 @@
+{
+  "name": "repro-recoverable-ssr-error-stacks",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "16.4.0-canary.61",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  }
+}
