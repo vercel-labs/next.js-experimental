@@ -1,0 +1,19 @@
+{
+  "name": "repro-bailout-no-component",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "build:debug-prerender": "next build --debug-prerender"
+  },
+  "dependencies": {
+    "next": "16.4.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "@types/react": "^19",
+    "typescript": "^5"
+  }
+}
