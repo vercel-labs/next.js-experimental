@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "./build.sh",
+    "build": "bash build.sh",
     "repro": "node skew-test.mjs",
     "all": "npm run build && npm run repro"
   },

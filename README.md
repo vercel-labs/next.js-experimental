@@ -34,7 +34,7 @@ npm install
 npm run all     # builds app/ twice (16.3.8, then 16.4.0) and runs the skew scenario
 ```
 
-`build.sh` builds the *same* directory with both Next.js versions so the Server Action ID
+`bash build.sh` builds the *same* directory with both Next.js versions so the Server Action ID
 and build ID are identical, then stashes each `.next` + `node_modules` under `stash/`.
 `skew-test.mjs` starts the 16.3.8 server on port 3000, opens the page in Chromium, runs
 the action (resolves), kills the server, starts the 16.4.0 server on the same port with
