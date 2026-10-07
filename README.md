@@ -21,3 +21,6 @@ or an older entry kept by an existing pnpm-lock.yaml) dedupes the plugin's copy 
 crashes before linting.
 
 Workaround: pin `zod-validation-error` to `4.0.2` (pnpm overrides / pnpm-workspace.yaml).
+
+Note: `pnpm-workspace.yaml` sets `minimumReleaseAge: 0` only so pnpm 12 will install the
+canary versions pinned in the committed lockfile.
