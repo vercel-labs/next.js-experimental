@@ -1,0 +1,15 @@
+{
+  "name": "bun-usesearchparams-suspense-repro",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "build:bun": "bun --bun next build",
+    "dev": "next dev",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "16.4.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  }
+}
