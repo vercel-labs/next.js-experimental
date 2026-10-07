@@ -1,3 +1,5 @@
 node_modules
-.next
-package-lock.json
+stash
+artifacts
+app/.next
+app/node_modules

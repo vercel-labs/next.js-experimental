@@ -1,16 +1,11 @@
 {
-  "name": "inert-hydration-repro",
+  "name": "nextjs-server-action-version-skew-repro",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev --turbopack -p 3000",
-    "repro": "node repro.mjs"
+    "build": "./build.sh",
+    "repro": "node skew-test.mjs",
+    "all": "npm run build && npm run repro"
   },
-  "dependencies": {
-    "next": "16.5.0-canary.2",
-    "react": "19.2.0",
-    "react-dom": "19.2.0"
-  },
-  "devDependencies": {
-    "playwright": "^1.63.0"
-  }
+  "devDependencies": { "playwright": "1.62.0" }
 }
