@@ -1,0 +1,13 @@
+{
+  "name": "nextjs-bun-bun-dev-repro",
+  "private": true,
+  "scripts": {
+    "dev:bun": "bun --bun run ./node_modules/.bin/next dev --port 3000",
+    "dev:node": "next dev --port 3000"
+  },
+  "dependencies": {
+    "next": "16.4.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  }
+}
