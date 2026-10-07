@@ -1,27 +1,26 @@
-# Repro: `instant = false` + Cache Components — `redirect()` / `notFound()` answer HTTP 200
+# Repro: `notFound()` called inside a Client Component (Cache Components)
 
-Next.js 16.4.0, Turbopack, `next build` + `next start`.
+Next.js 16.4.0, App Router, `cacheComponents: true`, Turbopack.
 
-`next.config.js` enables `cacheComponents: true`; every `page`/`layout` exports `instant = false`
-(as produced by the `cache-components-instant-false` codemod in the migration guide).
+`app/item/[id]/page.tsx` is a `'use client'` page that reads the dynamic segment with
+`useParams()` and calls `notFound()` during render when the id is invalid. It is wrapped
+in a `<Suspense>` boundary in `app/item/[id]/layout.tsx`, with
+`app/item/[id]/not-found.tsx` as the nearest boundary.
 
 ## Run
 
 ```bash
 npm install
-npm run build
-npm start          # port 3000
-curl -sI localhost:3000/redirect-dynamic   # expected 307, actual 200
-curl -sI localhost:3000/items/nope         # expected 404, actual 200
-curl -sI localhost:3000/redirect-me        # 307 (fully static page is OK)
+npm run dev   # http://localhost:3000
 ```
 
-## Observed on 16.4.0
+- Click "invalid item" on `/` (client navigation) -> nearest not-found UI renders.
+- Open `/item/nope` directly (full page load) -> HTTP **200**, HTML contains only the
+  Suspense fallback; the not-found UI appears after hydration.
 
-| route | server call | expected | actual |
-| --- | --- | --- | --- |
-| `/redirect-dynamic` (awaits `searchParams`) | `redirect('/')` | 307 + `location` | **200**, `<html id="__next_error__">`, redirect happens client-side |
-| `/items/nope` (awaits `params`) | `notFound()` | 404 | **200**, 404 UI rendered client-side |
-| `/redirect-me` (fully static) | `redirect('/')` | 307 | 307 |
+Production (`npm run build && npm start`) behaves the same: HTTP 200 and no not-found
+markup/`<meta name="robots" content="noindex">` in the streamed HTML.
 
-Removing `cacheComponents` + `instant = false` restores 307 / 404 for the same pages.
+Docs (`docs/01-app/03-api-reference/04-functions/not-found.mdx`) state `notFound()` can be
+invoked in Server Components, Server Functions, and Route Handlers — Client Components are
+not mentioned, nor is the page-load vs client-navigation difference or the 200 status.
