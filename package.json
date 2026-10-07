@@ -1,0 +1,21 @@
+{
+  "name": "instant-cleanup-repro",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "start": "next start",
+    "test": "playwright test"
+  },
+  "dependencies": {
+    "next": "16.5.0-canary.2",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@next/playwright": "16.5.0-canary.2",
+    "@playwright/test": "1.61.0",
+    "@types/node": "26.6.4",
+    "@types/react": "19.3.0",
+    "typescript": "7.0.2"
+  }
+}
