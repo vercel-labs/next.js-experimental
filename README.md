@@ -1,59 +1,59 @@
-# DX feedback #14 — "Client lazy compilation emits conflicting assets when opening a deferred UI"
+# Turbopack persistent cache: unactionable shutdown/compaction warning under disk pressure
 
-Attempted reproduction of the anonymized report: Next.js 16.4.0, `next dev --turbopack`,
-Turbopack **client lazy dynamic compilation**, `React.lazy` / `next/dynamic` deferred UI with a
-Markdown renderer that lazily loads **syntax highlighting (shiki)** and **diagram (mermaid)** chunks,
-Cache Components enabled, clean cache, authenticated page, then open the deferred UI.
-
-Reported failure (not observed here): Turbopack issue
-`Two or more assets with different content were emitted to the same output path`
-(`EmitConflictIssue`, `crates/next-core/src/emit.rs`) for the syntax-highlighting and diagram chunks,
-plus related API requests returning 500.
-
-## Setup
-
-```bash
-npm install
-npx playwright install chromium
-```
+Next.js 16.4.0, `next build` with Turbopack persistent caching
+(`experimental.turbopackFileSystemCacheForBuild: true`).
 
 ## Run
 
 ```bash
-npm run repro          # clean .next, next dev --turbopack on :3000
-npm run drive          # Playwright: load the page with a session cookie, open the deferred UI
-npm run drive:race     # 3 concurrent tabs + reload mid-compile, to race two lazy activations
+npm install
+bash repro.sh
 ```
 
-`app/markdown.tsx` is loaded through `React.lazy` + `next/dynamic` and renders `streamdown`,
-whose internal `import('./highlighted-body-*.js')` (shiki) and `import('./mermaid-*.js')` (mermaid)
-plus an app-level `import('mermaid')` are all compiled lazily on first open.
+Linux only: the script uses an unprivileged user namespace to mount a small
+tmpfs at `.next/cache`, which simulates a nearly-full disk for the cache
+without touching the real filesystem.
 
-Config knobs under test (`next.config.ts`):
+## Observed
 
-```ts
-cacheComponents: true,
-partialPrefetching: true,
-experimental: {
-  turbopackLazyDynamicImports: true,
-  turbopackLazyDynamicImportsSSR: true, // also tried: false
-}
-```
-
-## Observed on next@16.4.0 (and next@16.5.0-canary.1)
-
-Opening the deferred UI compiles and serves every lazy chunk with HTTP 200, highlights the code
-block, renders the mermaid diagram, and `/api/data` answers 200. No `EmitConflictIssue`, no 500s,
-across clean-cache runs with `turbopackLazyDynamicImportsSSR` both `true` and `false`, and with
-concurrent tabs/reloads during the first compile.
-
-Served lazy-compilation chunk requests (all 200), e.g.:
+Build 1 (cold cache, space available) succeeds. Builds 2 and 3, with the cache
+filesystem full, still compile and emit all routes and **exit with code 0**,
+while printing in the middle of the build output:
 
 ```
-/_next/static/chunks/app_markdown_tsx_lazy-compilation-5f0a4589b78905a4_*.js
-/_next/static/chunks/node_modules_streamdown_dist_highlighted-body-KQOG7T2V_*.js
-/_next/static/chunks/node_modules_streamdown_dist_mermaid-MCJ5UELQ_*.js
-/_next/static/chunks/1daa_mermaid_dist_mermaid_core_mjs_lazy-compilation-5de8e25b6c738408_*.js
+✓ Compiled successfully in 160ms
+  Running TypeScript ...
+Shutting down failed: Failed to compact database
+...
+Route (app)
+┌ ○ /
+└ ○ /_not-found
+--> exit code: 0
 ```
 
-The reporter's project source is not available, so the exact chunk layout that collides is unknown.
+The message does not mention disk space, is not formatted as a Next.js
+warning, and recurs on every subsequent build. Only when the snapshot write
+(not the compaction) fails does the real cause get printed:
+
+```
+Persisting failed during shutdown: Unable to write SST file 00000025.sst
+
+Caused by:
+    0: Failed to write value block
+    1: Failed to write block data
+    2: failed to write to file `.../.next/cache/turbopack/v16.4.0-.../00000025.sst`: No space left on device (os error 28)
+```
+
+## Expected
+
+A cache-maintenance failure should be clearly distinguished from a build-output
+failure and should surface the actionable cause (ENOSPC / free disk space),
+e.g. as a `⚠ Turbopack cache could not be compacted: No space left on device`
+warning.
+
+## Note
+
+`Shutting down failed: {err}` is printed with `Display`, so the anyhow cause
+chain containing `No space left on device` is dropped
+(`turbopack/crates/turbo-tasks-backend/src/backend/mod.rs`, `stop()`), unlike
+the neighbouring `Persisting failed during shutdown: {err:?}`.
