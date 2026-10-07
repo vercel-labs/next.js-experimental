@@ -1,9 +1,8 @@
 {
-  "name": "bun-usesearchparams-suspense-repro",
+  "name": "repro-usesearchparams-suspense",
   "private": true,
   "scripts": {
     "build": "next build",
-    "build:bun": "bun --bun next build",
     "dev": "next dev",
     "start": "next start"
   },
@@ -11,5 +10,10 @@
     "next": "16.4.0",
     "react": "19.2.0",
     "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "typescript": "^7.0.2"
   }
 }
