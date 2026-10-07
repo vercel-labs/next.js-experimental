@@ -1,0 +1,20 @@
+{
+  "name": "turbopack-build-worker-port-repro",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "build": "next build --turbopack",
+    "build:webpack": "next build --webpack",
+    "repro": "bash scripts/run-restricted-build.sh"
+  },
+  "dependencies": {
+    "next": "16.4.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "@types/react": "^19",
+    "typescript": "^5"
+  }
+}
