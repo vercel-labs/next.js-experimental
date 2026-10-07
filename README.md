@@ -1,47 +1,25 @@
-# `inert` hydration mismatch in a streamed client subtree — minimal reproduction
+# Turbopack `next build` deadlock: worker graph imports its spawner
 
-Setup: Next.js `16.5.0-canary.2`, dev mode, Turbopack, `cacheComponents: true`,
-`partialPrefetching: true`, `<Suspense>` around an async server component that
-renders a client component, plus `<Activity mode="hidden">` inside that client
-component. React 19.2.
+`next build` (Turbopack) parks forever at "Creating an optimized production build ..."
+with 0% CPU when a Web Worker's module graph imports the module that spawns the worker.
+
+Graph: `app/client.jsx` -> `lib/work.js` -> `lib/spawn.js` -> (new Worker) `lib/worker.js` -> `lib/work.js`
 
 ## Run
 
 ```bash
 npm install
-npx playwright install chromium
-npm run dev            # terminal 1 (next dev --turbopack)
-node repro.mjs                 # control  -> exits 0, no hydration message
-node repro.mjs third-party     # mutation -> exits 1, hydration diff shows `- inert=""`
+npm run build          # Turbopack: hangs indefinitely, 0% CPU, no error (verified 6+ min)
+npm run build:webpack  # webpack: succeeds in ~10s
 ```
 
-## Result
+## Verified on Next.js 16.4.0, Node 24.20.0, linux x64
 
-* **Control (framework only):** navigating `/` -> `/other` with Cache Components,
-  Partial Prefetching, Suspense streaming and hidden Activity produces **no**
-  hydration message and **no** `inert` attribute anywhere in the DOM.
-* **`third-party` variant:** an inline script (simulating a focus-trap/`markOthers`
-  style a11y library or a browser extension) sets `inert` on nodes as they are
-  inserted, before React hydrates them. React then reports:
+| case | result |
+| --- | --- |
+| Turbopack, cycle present | hang, 0% CPU, 2/2 clean runs |
+| Turbopack, `lib/worker.js` does not import `lib/work.js` | builds OK |
+| webpack, cycle present | builds OK |
 
-  ```
-  A tree hydrated but some attributes of the server rendered HTML didn't match the client properties.
-  ...
-    <ClientBox label="home">
-      <div id="box-home" className="box"
-  -     inert=""
-      >
-  ```
-
-  i.e. the diff attributes `inert` to the *server* markup even though no component
-  ever passes an `inert` prop. It happens both for the shell-rendered client
-  component (`#box-shell`) and for the late-streamed one inside `<Suspense>`
-  (`#box-home`), so streaming/Activity is not required.
-
-## Notes
-
-`inert` is never emitted by Next.js: grepping `packages/next/src` (and the bundled
-`react-dom` server builds) in 16.5.0-canary.2 finds only comments and the generic
-attribute tables. React's SSR does not render hidden `<Activity>` content at all
-(`REACT_ACTIVITY_TYPE` with `mode="hidden"` is skipped in `react-dom-server`), so it
-cannot emit `inert` either.
+While hung, process CPU time (`/proc/<pid>/stat` utime+stime) stays frozen and all
+`tokio-rt-worker` / V8 threads are sleeping -> turbo-tasks await cycle, not CPU work.

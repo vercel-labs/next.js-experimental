@@ -1,16 +1,14 @@
 {
-  "name": "inert-hydration-repro",
+  "name": "turbopack-worker-cycle-repro",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack -p 3000",
-    "repro": "node repro.mjs"
+    "build": "next build",
+    "build:webpack": "next build --webpack",
+    "dev": "next dev"
   },
   "dependencies": {
-    "next": "16.5.0-canary.2",
+    "next": "16.4.0",
     "react": "19.2.0",
     "react-dom": "19.2.0"
-  },
-  "devDependencies": {
-    "playwright": "^1.63.0"
   }
 }
