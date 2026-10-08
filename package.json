@@ -1,5 +1,5 @@
 {
-  "name": "instant-false-repro",
+  "name": "next-cache-miss-fallback-shell-repro",
   "private": true,
   "scripts": {
     "build": "next build",
@@ -7,12 +7,10 @@
   },
   "dependencies": {
     "next": "16.4.0",
-    "react": "latest",
-    "react-dom": "latest"
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   },
   "devDependencies": {
-    "@types/node": "^26.6.4",
-    "@types/react": "^19.3.0",
-    "typescript": "^7.0.2"
+    "playwright": "1.64.0"
   }
 }
