@@ -1,0 +1,17 @@
+{
+  "name": "turbopack-css-hmr-race-repro",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack -p 3000",
+    "dev:webpack": "next dev --webpack -p 3000",
+    "repro": "node repro.mjs"
+  },
+  "dependencies": {
+    "next": "16.4.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "playwright": "1.61.0"
+  }
+}
