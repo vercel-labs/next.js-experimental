@@ -604,8 +604,20 @@ const nextDev = async (
           if (upgradeInProgress) {
             interruption ??= signal
             await handleSessionStop(null)
+            return
           }
-          return
+          if (interruption) {
+            // We signalled the worker ourselves while shutting down.
+            return
+          }
+          // Something else killed the worker (e.g. the OS running out of
+          // memory). Report it instead of exiting silently with code 0.
+          Log.error(
+            `The dev server was terminated by ${signal}. This is often caused by the operating system running out of memory.`
+          )
+          await handleSessionStop(null, false)
+          await flushUpgradeTelemetry()
+          process.exit(128 + (os.constants.signals[signal] ?? 0))
         }
         if (code === RESTART_EXIT_CODE) {
           // Starting the dev server will overwrite the `.next/trace` file, so we

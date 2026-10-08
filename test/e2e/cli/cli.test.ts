@@ -1066,15 +1066,11 @@ describe('CLI Usage', () => {
 
     // Regression test for the silent exit reported when the OS kills the
     // forked dev-server worker (e.g. macOS jetsam / the OOM killer): the
-    // `next dev` parent currently swallows the signal (the worker 'exit'
-    // handler returns early when `signal` is set) and exits with code 0
-    // without printing anything, so the dev server just disappears.
-    //
-    // This asserts the current, incorrect behavior. Once `next dev` reports
-    // the signal and exits non-zero (e.g. 128 + SIGKILL = 137), update the
-    // expectation below.
+    // `next dev` parent used to swallow the signal (the worker 'exit'
+    // handler returned early when `signal` was set) and exit with code 0
+    // without printing anything, so the dev server just disappeared.
     // @force-gate !windows
-    test('exits with code 0 and no message when the dev server worker is killed by a signal', async () => {
+    test('reports the signal and exits non-zero when the dev server worker is killed by a signal', async () => {
       const port = await findPort()
       let output = ''
       const { child, exit } = await launchDevServer(
@@ -1112,9 +1108,10 @@ describe('CLI Usage', () => {
         signal,
         reportsTheKilledWorker: /SIGKILL|killed|crashed|exited/i.test(output),
       }).toEqual({
-        code: 0,
+        // 128 + SIGKILL (9)
+        code: 137,
         signal: null,
-        reportsTheKilledWorker: false,
+        reportsTheKilledWorker: true,
       })
     })
 
