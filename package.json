@@ -1,0 +1,20 @@
+{
+  "name": "stale-module-repro",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack -p 3000",
+    "build": "next build",
+    "sweep": "node scripts/sweep.mjs"
+  },
+  "dependencies": {
+    "next": "16.4.0-canary.37",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.0",
+    "@types/react": "19.2.0",
+    "playwright": "1.56.0",
+    "typescript": "5.9.2"
+  }
+}
