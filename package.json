@@ -1,0 +1,14 @@
+{
+  "name": "next-77-agent-docs-path-repro",
+  "private": true,
+  "packageManager": "yarn@4.18.1",
+  "scripts": {
+    "dev": "next dev --turbopack -p 3111",
+    "repro": "node check.mjs"
+  },
+  "dependencies": {
+    "next": "16.4.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  }
+}

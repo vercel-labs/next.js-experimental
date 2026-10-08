@@ -1,0 +1,5 @@
+.next/
+.yarn/
+.pnp.*
+node_modules/
+AGENTS.md
