@@ -1,28 +1,15 @@
 {
-  "name": "dx-14-lazy-compilation-emit-conflict",
+  "name": "no-img-element-ogimage-repro",
   "private": true,
   "version": "0.0.0",
+  "workspaces": ["apps/*"],
   "scripts": {
-    "dev": "next dev --turbopack",
-    "clean": "rm -rf .next",
-    "repro": "rm -rf .next && next dev --turbopack -p 3000",
-    "drive": "node drive.mjs",
-    "drive:race": "node drive-race.mjs"
-  },
-  "dependencies": {
-    "mermaid": "^12.1.0",
-    "next": "^16.4.0",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
-    "react-markdown": "^10.1.0",
-    "shiki": "^4.5.0",
-    "streamdown": "^2.7.0"
+    "lint": "eslint apps/web",
+    "lint:from-app": "cd apps/web && eslint app"
   },
   "devDependencies": {
-    "@playwright/test": "^1.63.0",
-    "@types/node": "^26.6.4",
-    "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0",
-    "typescript": "^7.0.2"
+    "eslint": "^9",
+    "eslint-config-next": "16.4.0",
+    "typescript": "^5"
   }
 }
