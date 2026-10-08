@@ -1,13 +1,18 @@
 {
-  "name": "repro-turbopack-lazy-dynamic-imports-chunk-list-collision",
+  "name": "repro",
   "private": true,
+  "version": "0.0.0",
   "scripts": {
-    "dev": "next dev --turbopack"
+    "build": "next build"
   },
   "dependencies": {
     "next": "16.4.0",
     "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "streamdown": "2.7.0"
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.4",
+    "@types/react": "19.3.0",
+    "typescript": "7.0.2"
   }
 }
