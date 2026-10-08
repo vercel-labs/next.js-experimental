@@ -1,0 +1,13 @@
+{
+  "name": "repro-useeffect-date-cachecomponents",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev"
+  },
+  "dependencies": {
+    "next": "16.4.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  }
+}
