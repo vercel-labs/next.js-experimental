@@ -1,0 +1,18 @@
+{
+  "name": "next-dev-silent-exit-0-repro",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "repro": "bash ./repro.sh"
+  },
+  "dependencies": {
+    "next": "16.4.0-canary.56",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/react": "19.2.2",
+    "@types/node": "22.18.9"
+  }
+}
