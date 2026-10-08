@@ -1,0 +1,21 @@
+{
+  "name": "repro-99843",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "playwright test"
+  },
+  "dependencies": {
+    "next": "canary",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "26.6.4",
+    "@types/react": "19.3.0",
+    "typescript": "7.0.2"
+  }
+}
