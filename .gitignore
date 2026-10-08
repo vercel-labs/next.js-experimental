@@ -1,0 +1,6 @@
+node_modules
+.next
+playwright-report
+test-results
+tsconfig.json
+next-env.d.ts
