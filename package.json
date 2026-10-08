@@ -1,0 +1,20 @@
+{
+  "name": "cache-components-client-time-repro",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build"
+  },
+  "dependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "fake-carousel": "file:./packages/fake-carousel-1.0.0.tgz",
+    "next": "16.4.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "typescript": "^7.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.4"
+  }
+}
