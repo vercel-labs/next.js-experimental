@@ -1,16 +1,15 @@
 {
-  "name": "inert-hydration-repro",
+  "name": "repro-dev-ssr-stack-overflow",
   "private": true,
   "scripts": {
+    "gen": "node scripts/generate.mjs",
     "dev": "next dev --turbopack -p 3000",
-    "repro": "node repro.mjs"
+    "build": "next build",
+    "predev": "node scripts/generate.mjs 2000"
   },
   "dependencies": {
-    "next": "16.5.0-canary.2",
+    "next": "16.4.0-canary.55",
     "react": "19.2.0",
     "react-dom": "19.2.0"
-  },
-  "devDependencies": {
-    "playwright": "^1.63.0"
   }
 }
