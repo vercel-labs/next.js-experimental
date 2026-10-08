@@ -6,6 +6,7 @@ import pkg from 'next/package'
 import http from 'http'
 import { promises as fs } from 'fs'
 import stripAnsi from 'strip-ansi'
+import { execFileSync } from 'child_process'
 import type { ChildProcess } from 'child_process'
 
 const itCI = process.env.NEXT_TEST_CI ? it : it.skip
@@ -1061,6 +1062,60 @@ describe('CLI Usage', () => {
     test('should not throw UnhandledPromiseRejectionWarning', async () => {
       const { stderr } = await next.runCommand(['dev', '--random'])
       expect(stderr).not.toContain('UnhandledPromiseRejectionWarning')
+    })
+
+    // Regression test for the silent exit reported when the OS kills the
+    // forked dev-server worker (e.g. macOS jetsam / the OOM killer): the
+    // `next dev` parent currently swallows the signal (the worker 'exit'
+    // handler returns early when `signal` is set) and exits with code 0
+    // without printing anything, so the dev server just disappears.
+    //
+    // This asserts the current, incorrect behavior. Once `next dev` reports
+    // the signal and exits non-zero (e.g. 128 + SIGKILL = 137), update the
+    // expectation below.
+    // @force-gate !windows
+    test('exits with code 0 and no message when the dev server worker is killed by a signal', async () => {
+      const port = await findPort()
+      let output = ''
+      const { child, exit } = await launchDevServer(
+        ['dev', next.testDir, '-p', String(port)],
+        {
+          onStdout(msg) {
+            output += stripAnsi(msg)
+          },
+          onStderr(msg) {
+            output += stripAnsi(msg)
+          },
+          readyPattern: /- Local:/,
+        }
+      )
+
+      // `next dev` forks the actual dev server into a child process. Kill
+      // that worker the way the OS would, without touching the parent.
+      let workerPid: number | undefined
+      await retry(() => {
+        workerPid = Number(
+          execFileSync('pgrep', ['-P', String(child.pid)])
+            .toString()
+            .trim()
+            .split('\n')[0]
+        )
+        expect(workerPid).toBeGreaterThan(0)
+      })
+      output = ''
+      process.kill(workerPid!, 'SIGKILL')
+
+      const { code, signal } = await exit
+
+      expect({
+        code,
+        signal,
+        reportsTheKilledWorker: /SIGKILL|killed|crashed|exited/i.test(output),
+      }).toEqual({
+        code: 0,
+        signal: null,
+        reportsTheKilledWorker: false,
+      })
     })
 
     test('should exit when SIGINT is signalled', async () => {
