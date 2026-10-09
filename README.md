@@ -2,17 +2,20 @@
 
 Next.js `16.4.0-canary.62`, Turbopack, Cache Components, dynamic route.
 
-A user component (`components/clock.tsx`) renders a third-party component
-(`time-lib`, installed into `node_modules`) that calls `Date.now()`.
+A downstream component in a third-party package (`ui-lib`, physically installed under
+`node_modules`, so its frames are ignore-listed) reads `Date.now()` while the dynamic
+route `/blog/[slug]` is prerendered during `next build`.
 
 ## Run
 
-```
+```sh
 npm install
 npm run build
 ```
 
 ## Observed
+
+The build fails and attributes the error to the route only:
 
 ```
 Error: Route "/blog/[slug]": Next.js encountered the unstable value `Date.now()` while prerendering.
@@ -20,15 +23,14 @@ Error: Route "/blog/[slug]": Next.js encountered the unstable value `Date.now()`
     at ignore-listed frames
 ```
 
-The default production build output does not name any user component.
-
-`npm run build:debug` (`next build --turbopack --debug-prerender`) does surface it:
+No user component is named. `npm run build:debug` (`next build --debug-prerender`)
+does identify the owner:
 
 ```
-    at Clock (components/clock.tsx:6:10)
+    at CurrentTime (components/CurrentTime.tsx:5:10)
 ```
 
 ## Expected
 
 The default build output should point at the user component / source frame that
-leads to the current-time call, as `--debug-prerender` already does.
+leads to the current-time call.

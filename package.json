@@ -5,7 +5,7 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "prepare": "node ./scripts/link-vendor.mjs",
+    "postinstall": "node scripts/install-vendor.mjs",
     "build:debug": "next build --turbopack --debug-prerender"
   },
   "dependencies": {
