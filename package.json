@@ -1,0 +1,14 @@
+{
+  "name": "turbopack-worker-dynamic-url-repro",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev"
+  },
+  "dependencies": {
+    "fake-worker-lib": "file:./packages/fake-worker-lib",
+    "next": "16.4.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  }
+}
