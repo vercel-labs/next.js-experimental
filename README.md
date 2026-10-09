@@ -11,11 +11,11 @@ action is created during render, so its bound-args promise is a new reference on
 npm install
 npm run dev                            # next dev --turbopack -p 3000
 curl http://localhost:3000/permalink   # renders the form with the $ACTION_* hidden fields
-./post.sh                              # no-JS (progressive enhancement) multipart POST of that form
+bash post.sh                                 # no-JS (progressive enhancement) multipart POST of that form
 ```
 
 ### Observed
-`./post.sh` never receives a response. The dev server pins a CPU core and its heap grows without
+`bash post.sh` never receives a response. The dev server pins a CPU core and its heap grows without
 bound until it dies: `FATAL ERROR: Ineffective mark-compacts near heap limit - JavaScript heap out
 of memory` (the reporter saw `RangeError: Map maximum size exceeded` in `isSignatureEqual`).
 No `POST /permalink` line is ever logged.
@@ -24,7 +24,7 @@ No `POST /permalink` line is ever logged.
 `app/stable/` is identical except the action is bound once at module scope:
 
 ```bash
-./post-stable.sh   # HTTP/1.1 200 OK, payload contains {"boundArg":"bound-value","name":"world"}
+bash post-stable.sh   # HTTP/1.1 200 OK, payload contains {"boundArg":"bound-value","name":"world"}
 ```
 
 ### Expected
