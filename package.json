@@ -1,0 +1,22 @@
+{
+  "name": "instant-router-push-repro",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start",
+    "test": "playwright test"
+  },
+  "dependencies": {
+    "next": "16.4.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@next/playwright": "16.4.0",
+    "@playwright/test": "^1.61.0",
+    "@types/node": "22.18.8",
+    "@types/react": "19.2.2",
+    "typescript": "5.9.3"
+  }
+}
