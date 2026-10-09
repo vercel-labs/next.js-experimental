@@ -1,0 +1,21 @@
+{
+  "name": "repro-current-time-prerender",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start",
+    "prepare": "node ./scripts/link-vendor.mjs",
+    "build:debug": "next build --turbopack --debug-prerender"
+  },
+  "dependencies": {
+    "next": "16.4.0-canary.62",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.4",
+    "@types/react": "19.3.0",
+    "typescript": "7.0.2"
+  }
+}
