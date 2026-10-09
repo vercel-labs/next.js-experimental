@@ -1,0 +1,15 @@
+{
+  "name": "next-windows-path-casing-repro",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "build": "next build --webpack",
+    "repro": "node repro.mjs",
+    "repro:control": "node repro.mjs --control"
+  },
+  "dependencies": {
+    "next": "16.4.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  }
+}
