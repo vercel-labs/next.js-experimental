@@ -1,0 +1,8 @@
+:root {
+  --fg: #111;
+}
+
+body {
+  color: var(--fg);
+  font-family: system-ui, sans-serif;
+}
