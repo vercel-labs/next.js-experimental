@@ -1,26 +1,32 @@
-# Repro: `useRouter()` crashes in Storybook's App Router mock on Next.js 16.4.0
+# Repro: no-JS server action postback loops forever when the action is bound inside a client component render
 
-In 16.4.0 `useRouter()` reads `layout?.parentRenderTree.data.bfcacheId`
-(`next/dist/client/components/navigation.js`). The optional chain stops at `layout`,
-so any `LayoutRouterContext` value without `parentRenderTree` throws.
-`@storybook/nextjs-vite`'s app-directory router mock provides
-`{ childNodes, tree, parentTree, parentCacheNode, url, loading }` — no `parentRenderTree`.
+Next.js 16.4.0, React 19.2.0, App Router, `next dev --turbopack`.
+
+`app/form.tsx` calls `useActionState(submit.bind(null, arg), null, '/permalink')` — the bound
+action is created during render, so its bound-args promise is a new reference on every render.
 
 ## Run
 
 ```bash
 npm install
-npm test
+npm run dev                            # next dev --turbopack -p 3000
+curl http://localhost:3000/permalink   # renders the form with the $ACTION_* hidden fields
+./post.sh                              # no-JS (progressive enhancement) multipart POST of that form
 ```
 
-## Result
+### Observed
+`./post.sh` never receives a response. The dev server pins a CPU core and its heap grows without
+bound until it dies: `FATAL ERROR: Ineffective mark-compacts near heap limit - JavaScript heap out
+of memory` (the reporter saw `RangeError: Map maximum size exceeded` in `isSignatureEqual`).
+No `POST /permalink` line is ever logged.
 
-- next@16.4.0 → `TypeError: Cannot read properties of undefined (reading 'data')`
-  thrown from `useRouter` (first hit inside Next's own `RedirectBoundary`, which the
-  Storybook routing decorator renders).
-- next@16.3.0 → passes.
+### Control (works)
+`app/stable/` is identical except the action is bound once at module scope:
 
-The test renders a trivial story via portable stories, which runs the framework's
-`appDirectory` router-mock decorator exactly as Storybook does.
-`sb-image-context-stub.js` only stands in for the `sb-original/image-context` alias
-that the Storybook builder normally injects; it is unrelated to the crash.
+```bash
+./post-stable.sh   # HTTP/1.1 200 OK, payload contains {"boundArg":"bound-value","name":"world"}
+```
+
+### Expected
+The postback renders the page with the returned action state, or fails with a clear error that the
+bound action must be stable across renders.
