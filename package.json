@@ -1,0 +1,24 @@
+{
+  "name": "nextjs-lazy-dynamic-imports-repro",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "next dev",
+    "repro": "node scripts/run.mjs"
+  },
+  "dependencies": {
+    "mermaid": "^12.1.0",
+    "next": "16.4.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-markdown": "^10.1.0",
+    "react-syntax-highlighter": "^16.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-syntax-highlighter": "^15.5.13",
+    "playwright": "^1.56.0",
+    "typescript": "^5.9.0"
+  }
+}
