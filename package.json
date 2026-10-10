@@ -1,0 +1,15 @@
+{
+  "name": "next-stale-global-css-reproduction",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "verify": "node verify.mjs"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "4.1.18",
+    "next": "16.4.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "tailwindcss": "4.1.18"
+  }
+}
