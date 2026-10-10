@@ -17,8 +17,11 @@ for (let i = 0; i < 30; i++) {
   updated = await fetch(cssUrl, { cache: 'no-store' }).then(r => r.text())
   if (updated.includes('EDITED_MARKER_1')) break
 }
+const pageAfter = await fetch(origin).then(r => r.text())
+const hrefAfter = pageAfter.match(/href="([^"]+\.css[^"]*)"/)?.[1]
 console.log(JSON.stringify({
-  cssPathBeforeAndAfter: cssUrl.pathname,
+  cssPath: cssUrl.pathname,
+  sameCssUrlAfterEdit: hrefAfter === href,
   initialMarker: initial.includes('INITIAL_MARKER'),
   editedMarker: updated.includes('EDITED_MARKER_1'),
   staleInitialMarker: updated.includes('INITIAL_MARKER')
