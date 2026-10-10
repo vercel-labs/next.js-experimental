@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+.initial-rule {
+  color: rgb(1, 2, 3);
+}
