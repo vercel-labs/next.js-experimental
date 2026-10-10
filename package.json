@@ -1,0 +1,17 @@
+{
+  "name": "next-prefetch-optional-catchall-repro",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "start": "next start -p 3000",
+    "measure": "node measure.mjs"
+  },
+  "dependencies": {
+    "next": "16.4.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2"
+  }
+}
