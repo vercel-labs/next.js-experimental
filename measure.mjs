@@ -27,5 +27,7 @@ const byUrl = Object.entries(idleRequests.reduce((counts, request) => {
 }, {})).sort((a, b) => b[1] - a[1])
 const result = { totalPrefetchRequests: requests.length, requestsDuringFiveIdleSeconds: idleRequests.length, responseStatuses: responses.reduce((counts, response) => { counts[response.status] = (counts[response.status] || 0) + 1; return counts }, {}), byUrl }
 console.log(JSON.stringify(result, null, 2))
-await page.screenshot({ path: '/workspace/.next-maintainer/reproduction-artifacts/playwright/listing.png', fullPage: true })
+if (process.env.PLAYWRIGHT_SCREENSHOT_PATH) {
+  await page.screenshot({ path: process.env.PLAYWRIGHT_SCREENSHOT_PATH, fullPage: true })
+}
 await browser.close()
